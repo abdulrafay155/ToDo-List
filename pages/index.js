@@ -7,6 +7,7 @@ export default function Home() {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [editIndex, setEditIndex] = useState(null);
   const [editTask, setEditTask] = useState('');
+  const [isRewardUnlocked, setIsRewardUnlocked] = useState(false);
 
   useEffect(() => {
     const storedTasks = JSON.parse(localStorage.getItem('tasks')) || [];
@@ -18,6 +19,10 @@ export default function Home() {
       document.documentElement.classList.toggle('dark', darkModePreference);
     }
   }, []);
+
+  useEffect(() => {
+    checkAllTasksCompleted();
+  }, [tasks]);
 
   const addTask = () => {
     if (newTask.trim()) {
@@ -64,12 +69,17 @@ export default function Home() {
     localStorage.setItem('isDarkMode', JSON.stringify(newDarkMode));
   };
 
+  const checkAllTasksCompleted = () => {
+    const allCompleted = tasks.every(task => task.completed);
+    setIsRewardUnlocked(allCompleted);
+  };
+
   return (
     <div className={`min-h-screen p-5 ${isDarkMode ? 'bg-gray-800' : 'bg-gray-100'} ${isDarkMode ? 'text-white' : 'text-black'} font-sans`}>
       <div className="max-w-md mx-auto mt-10">
         <div className={`bg-white dark:bg-gray-700 shadow-lg rounded-lg px-4 py-6 ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>
           <div className="flex justify-between items-center mb-4">
-            <h1 className="text-2xl font-bold">To-Do List</h1>
+            <h1 className="text-2xl font-bold">To Do List</h1>
             <button
               onClick={toggleDarkMode}
               className={`p-2 rounded ${isDarkMode ? 'bg-gray-600' : 'bg-gray-300'}`}
@@ -142,6 +152,40 @@ export default function Home() {
               </li>
             ))}
           </ul>
+          <div className="mt-6">
+            {isRewardUnlocked ? (
+              <div className="relative">
+                <div className="text-center p-5 bg-green-600 text-white rounded-lg shadow-lg">
+                  <h2 className="text-2xl font-bold">Congratulations! 🎉</h2>
+                  <p className="mt-2">You&apos;ve completed all tasks!</p>
+                </div>
+                <div className="ribbon-animation absolute inset-0 pointer-events-none">
+                  {/* Ribbon animation CSS */}
+                  <style jsx>{`
+                    .ribbon-animation {
+                      background-image: url('/ribbon.png');
+                      background-size: cover;
+                      animation: fall 2s linear infinite;
+                    }
+
+                    @keyframes fall {
+                      from {
+                        transform: translateY(-100%);
+                      }
+                      to {
+                        transform: translateY(100%);
+                      }
+                    }
+                  `}</style>
+                </div>
+              </div>
+            ) : (
+              <div className="text-center p-5 bg-gray-600 rounded-lg shadow-lg text-white">
+                <h2 className="text-2xl font-bold">UNCOMPLETE 🔒</h2>
+                <p className="mt-2">Complete all the tasks!</p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
