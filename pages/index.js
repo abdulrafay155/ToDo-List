@@ -1,5 +1,12 @@
 import { useState, useEffect } from 'react';
 import { SunIcon, MoonIcon, PencilIcon, TrashIcon, CheckIcon } from '@heroicons/react/outline';
+import MissionTracker from '@/components/MissionTracker';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 export default function Home() {
   const [tasks, setTasks] = useState([]);
@@ -8,6 +15,8 @@ export default function Home() {
   const [editIndex, setEditIndex] = useState(null);
   const [editTask, setEditTask] = useState('');
   const [isRewardUnlocked, setIsRewardUnlocked] = useState(false);
+  const [currentTime, setCurrentTime] = useState('');
+  const [challengeStartTime, setChallengeStartTime] = useState('');
 
   useEffect(() => {
     const storedTasks = JSON.parse(localStorage.getItem('tasks')) || [];
@@ -18,6 +27,18 @@ export default function Home() {
       setIsDarkMode(darkModePreference);
       document.documentElement.classList.toggle('dark', darkModePreference);
     }
+
+    const storedStartTime = localStorage.getItem('challengeStartTime');
+    if (storedStartTime) {
+      setChallengeStartTime(storedStartTime);
+    }
+
+    // Update the current time every second
+    const intervalId = setInterval(() => {
+      setCurrentTime(dayjs().tz('Asia/Karachi').format('YYYY-MM-DD HH:mm'));
+    }, 1000);
+
+    return () => clearInterval(intervalId);
   }, []);
 
   useEffect(() => {
@@ -72,6 +93,12 @@ export default function Home() {
   const checkAllTasksCompleted = () => {
     const allCompleted = tasks.every(task => task.completed);
     setIsRewardUnlocked(allCompleted);
+  };
+
+  const handleTimeChange = (e) => {
+    const startTime = e.target.value;
+    setChallengeStartTime(startTime);
+    localStorage.setItem('challengeStartTime', startTime);
   };
 
   return (
@@ -159,35 +186,19 @@ export default function Home() {
                   <h2 className="text-2xl font-bold">Congratulations! 🎉</h2>
                   <p className="mt-2">You&apos;ve completed all tasks!</p>
                 </div>
-                <div className="ribbon-animation absolute inset-0 pointer-events-none">
-                  {/* Ribbon animation CSS */}
-                  <style jsx>{`
-                    .ribbon-animation {
-                      background-image: url('/ribbon.png');
-                      background-size: cover;
-                      animation: fall 2s linear infinite;
-                    }
-
-                    @keyframes fall {
-                      from {
-                        transform: translateY(-100%);
-                      }
-                      to {
-                        transform: translateY(100%);
-                      }
-                    }
-                  `}</style>
-                </div>
+                <div className="ribbon-animation"></div>
               </div>
             ) : (
-              <div className="text-center p-5 bg-gray-600 rounded-lg shadow-lg text-white">
-                <h2 className="text-2xl font-bold">UNCOMPLETE 🔒</h2>
-                <p className="mt-2">Complete all the tasks!</p>
+              <div className="text-center p-5 bg-red-600 text-white rounded-lg shadow-lg">
+                <h2 className="text-2xl font-bold">Keep Going!</h2>
+                <p className="mt-2">Complete all tasks to unlock.</p>
               </div>
             )}
           </div>
+         
         </div>
       </div>
+      <MissionTracker />
     </div>
   );
 }
