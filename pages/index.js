@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { SunIcon, MoonIcon, PencilIcon, TrashIcon, CheckIcon } from '@heroicons/react/outline';
-import MissionTracker from '@/components/MissionTracker';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
@@ -198,7 +197,7 @@ export default function Home() {
          
         </div>
       </div>
-      <MissionTracker />
+      
     </div>
   );
 }
